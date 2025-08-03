@@ -30,6 +30,9 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/h1/{id1}/i1/{id2}", h.GetHandler).Methods(http.MethodGet)
 	r.HandleFunc("/h2", h.PostHandler).Methods(http.MethodPost)
+	r.HandleFunc("/users/{userID}", h.GetUserHandler).Methods(http.MethodGet)
+	r.HandleFunc("/users", h.CreateUserHandler).Methods(http.MethodPost)
+	r.HandleFunc("/users/{userID}", h.DeleteUserHandler).Methods(http.MethodDelete)
 
 	// serve
 	srv := &http.Server{

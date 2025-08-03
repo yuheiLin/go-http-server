@@ -10,7 +10,8 @@ func New() ApiClient {
 }
 
 // curl "http://localhost:8080/h1?p1=abc"
-// curl -X POST -H "Content-Type: application/json" -d '{"r1":"xyz", "r2":"abc"}' "http://localhost:8080/h2"
+// curl -X POST -H "Content-Type: application/json" -d '{"id":"123", "name":"name123"}' "http://localhost:10000/users"
+// curl -X DELETE "http://localhost:10000/users/123"
 
 //func callExternalAPI() (*ExternalAPIResponse, error) {
 //	// Create HTTP client with timeout
