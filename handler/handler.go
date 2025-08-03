@@ -3,6 +3,7 @@ package handler
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	"github.com/yuheiLin/go-http-server/service"
 	"log"
 	"net/http"
@@ -10,8 +11,8 @@ import (
 )
 
 type Handler interface {
-	Handler1(w http.ResponseWriter, r *http.Request)
-	Handler2(w http.ResponseWriter, r *http.Request)
+	GetHandler(w http.ResponseWriter, r *http.Request)
+	PostHandler(w http.ResponseWriter, r *http.Request)
 }
 
 type handlerImpl struct {
@@ -45,13 +46,14 @@ type ReturnObject struct {
 	F2 string `json:"f2"`
 }
 
-func (h *handlerImpl) Handler1(w http.ResponseWriter, r *http.Request) {
-	infoLogger.Println("handler1 called")
+func (h *handlerImpl) GetHandler(w http.ResponseWriter, r *http.Request) {
+	infoLogger.Println("GetHandler called")
 
 	if r.Method != http.MethodGet {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
 	}
+	// get query parameters
 	p1 := r.URL.Query().Get("p1")
 	fmt.Println("received p1:", p1)
 	if p1 == "" {
@@ -60,17 +62,22 @@ func (h *handlerImpl) Handler1(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// get path parameters
+	vars := mux.Vars(r)
+	id1 := vars["id1"]
+	id2 := vars["id2"]
+
 	w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(ReturnObject{
-		F1: "f1_value_" + p1,
+		F1: fmt.Sprintf("f1_value_id1_%s_id2_%s_p1_%s", id1, id2, p1),
 		F2: "f2_value",
 	}); err != nil {
 		log.Println("failed to encode response:", err)
 	}
 }
 
-func (h *handlerImpl) Handler2(w http.ResponseWriter, r *http.Request) {
-	infoLogger.Println("handle2 called")
+func (h *handlerImpl) PostHandler(w http.ResponseWriter, r *http.Request) {
+	infoLogger.Println("PostHandler called")
 
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
