@@ -18,7 +18,7 @@ import (
 type Handler interface {
 	GetUserHandler(w http.ResponseWriter, r *http.Request)
 	CreateUserHandler(w http.ResponseWriter, r *http.Request)
-	//DeleteUserHandler(w http.ResponseWriter, r *http.Request)
+	DeleteUserHandler(w http.ResponseWriter, r *http.Request)
 }
 
 type handlerImpl struct {
@@ -204,28 +204,47 @@ func (h *handlerImpl) CreateUserHandler(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-//func (h *handlerImpl) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
-//	infoLogger.Println("DeleteUserHandler called")
-//
-//	if r.Method != http.MethodDelete {
-//		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
-//		return
-//	}
-//
-//	// get user ID from path parameters
-//	vars := mux.Vars(r)
-//	userID := vars["userID"]
-//	if userID == "" {
-//		errorLogger.Println("missing path parameter userID")
-//		http.Error(w, "Bad Request: missing path parameter userID", http.StatusBadRequest)
-//		return
-//	}
-//
-//	if err := h.service.DeleteUser(userID); err != nil {
-//		errorLogger.Println("failed to delete user:", err)
-//		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-//		return
-//	}
-//
-//	w.WriteHeader(http.StatusOK)
-//}
+func (h *handlerImpl) DeleteUserHandler(w http.ResponseWriter, r *http.Request) {
+	infoLogger.Println("DeleteUserHandler called")
+
+	// authenticate user
+	authHeader := r.Header.Get("Authorization")
+	authHeader = strings.TrimPrefix(authHeader, "Basic ")
+	authDecoded, _ := base64.StdEncoding.DecodeString(authHeader)
+	authDecodedString := string(authDecoded)
+	idpass := strings.Split(authDecodedString, ":")
+	if len(idpass) != 2 {
+		w.WriteHeader(http.StatusUnauthorized)
+		response := APIResponse{
+			Message: "Authentication failed",
+		}
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			log.Println("failed to encode response:", err)
+		}
+		return
+	}
+	if err := h.service.VerifyUser(idpass[0], idpass[1]); err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		response := APIResponse{
+			Message: "Authentication failed",
+		}
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			log.Println("failed to encode response:", err)
+		}
+		return
+	}
+
+	if err := h.service.DeleteUser(idpass[0]); err != nil {
+		errorLogger.Println("failed to delete user:", err)
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+		return
+	}
+
+	response := APIResponse{
+		Message: "Account and user successfully removed",
+	}
+
+	if err := json.NewEncoder(w).Encode(response); err != nil {
+		log.Println("failed to encode response:", err)
+	}
+}

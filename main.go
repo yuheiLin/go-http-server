@@ -32,7 +32,7 @@ func main() {
 	r.HandleFunc("/signup", h.CreateUserHandler).Methods(http.MethodPost)
 	r.HandleFunc("/users/{userID}", h.GetUserHandler).Methods(http.MethodGet)
 	//r.HandleFunc("/users/{userID}", h.UpdateUserHandler).Methods(http.MethodPatch)
-	//r.HandleFunc("/close", h.DeleteUserHandler).Methods(http.MethodPost)
+	r.HandleFunc("/close", h.DeleteUserHandler).Methods(http.MethodPost)
 
 	// serve
 	srv := &http.Server{
