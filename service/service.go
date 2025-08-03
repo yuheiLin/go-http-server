@@ -10,7 +10,7 @@ type Service interface {
 	GetUser(userID string) (*model.User, error)
 	CreateUser(userID string, password string) (*model.User, error)
 	VerifyUser(userID string, password string) error
-	//DeleteUser(userID string) error
+	DeleteUser(userID string) error
 }
 type serviceImpl struct {
 	repository repository.Repository
@@ -36,6 +36,6 @@ func (service *serviceImpl) VerifyUser(userID string, password string) error {
 	return service.repository.VerifyUser(userID, password)
 }
 
-//func (service *serviceImpl) DeleteUser(userID string) error {
-//	return service.repository.DeleteUser(userID)
-//}
+func (service *serviceImpl) DeleteUser(userID string) error {
+	return service.repository.DeleteUser(userID)
+}

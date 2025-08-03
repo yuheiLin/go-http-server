@@ -78,9 +78,14 @@ func (h *handlerImpl) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	authDecoded, _ := base64.StdEncoding.DecodeString(authHeader)
 	authDecodedString := string(authDecoded)
 	idpass := strings.Split(authDecodedString, ":")
-	if len(idpass) != 2 || idpass[0] != userID {
-		errorLogger.Println("Invalid Basic Auth header format")
-		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+	if len(idpass) != 2 {
+		w.WriteHeader(http.StatusUnauthorized)
+		response := APIResponse{
+			Message: "Authentication failed",
+		}
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			log.Println("failed to encode response:", err)
+		}
 		return
 	}
 	if err := h.service.VerifyUser(idpass[0], idpass[1]); err != nil {

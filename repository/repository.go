@@ -10,6 +10,7 @@ type Repository interface {
 	GetUser(userID string) (*model.User, error)
 	CreateUser(userID string, password string) (*model.User, error)
 	VerifyUser(userID string, password string) error
+	DeleteUser(userID string) error
 }
 
 type repositoryImpl struct {
@@ -89,7 +90,7 @@ func (r *repositoryImpl) VerifyUser(userID string, password string) error {
 	return nil
 }
 
-//func (r *repositoryImpl) DeleteUser(userID string) error {
-//	r.userData.Delete(userID)
-//	return nil
-//}
+func (r *repositoryImpl) DeleteUser(userID string) error {
+	r.userData.Delete(userID)
+	return nil
+}
