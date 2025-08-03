@@ -9,6 +9,7 @@ import (
 type Service interface {
 	GetUser(userID string) (*model.User, error)
 	CreateUser(userID string, password string) (*model.User, error)
+	VerifyUser(userID string, password string) error
 	//DeleteUser(userID string) error
 }
 type serviceImpl struct {
@@ -29,6 +30,10 @@ func (service *serviceImpl) GetUser(userID string) (*model.User, error) {
 
 func (service *serviceImpl) CreateUser(userID string, password string) (*model.User, error) {
 	return service.repository.CreateUser(userID, password)
+}
+
+func (service *serviceImpl) VerifyUser(userID string, password string) error {
+	return service.repository.VerifyUser(userID, password)
 }
 
 //func (service *serviceImpl) DeleteUser(userID string) error {

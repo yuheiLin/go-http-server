@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"errors"
 	"github.com/gorilla/mux"
@@ -11,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"regexp"
+	"strings"
 )
 
 type Handler interface {
@@ -54,6 +56,26 @@ func validateLettersAndDigits(input string) bool {
 
 func (h *handlerImpl) GetUserHandler(w http.ResponseWriter, r *http.Request) {
 	infoLogger.Println("GetUserHandler called")
+
+	authHeader := r.Header.Get("Basic")
+	authDecoded, _ := base64.StdEncoding.DecodeString(authHeader)
+	authDecodedString := string(authDecoded)
+	idpass := strings.Split(authDecodedString, ":")
+	if len(idpass) != 2 {
+		errorLogger.Println("Invalid Basic Auth header format")
+		http.Error(w, "Unauthorized", http.StatusUnauthorized)
+		return
+	}
+	if err := h.service.VerifyUser(idpass[0], idpass[1]); err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		response := APIResponse{
+			Message: "Authentication failed",
+		}
+		if err := json.NewEncoder(w).Encode(response); err != nil {
+			log.Println("failed to encode response:", err)
+		}
+		return
+	}
 
 	// get user ID from path parameters
 	vars := mux.Vars(r)

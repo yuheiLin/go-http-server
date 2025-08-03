@@ -9,6 +9,7 @@ import (
 type Repository interface {
 	GetUser(userID string) (*model.User, error)
 	CreateUser(userID string, password string) (*model.User, error)
+	VerifyUser(userID string, password string) error
 }
 
 type repositoryImpl struct {
@@ -72,6 +73,20 @@ func (r *repositoryImpl) CreateUser(userID string, password string) (*model.User
 		Nickname: user.Nickname,
 		Comment:  user.Comment,
 	}, nil
+}
+
+func (r *repositoryImpl) VerifyUser(userID string, password string) error {
+	u, ok := r.userData.Load(userID)
+	if !ok {
+		return customerror.ErrUserNotFound
+	}
+	ud := u.(userVal)
+
+	if ud.Password != password {
+		return customerror.ErrUserNotFound
+	}
+
+	return nil
 }
 
 //func (r *repositoryImpl) DeleteUser(userID string) error {
